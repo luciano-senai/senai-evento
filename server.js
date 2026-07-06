@@ -40,7 +40,7 @@ app.post('/:user/eventos', async (req, res) => {
     const newDoc = await db.collection(`/users/${user}/eventos`).add({
       titulo: newEvento.titulo,
       descricao:newEvento. descricao,
-      data: newEvento.data ,
+      data: new Date().toISOString(),
       local: newEvento.local,
       imagem: newEvento.imagem,
       valor: newEvento.valor,
