@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import dotenv from 'dotenv';
 import * as yup from 'yup';
 import { parse, isDate } from 'date-fns';
@@ -45,15 +45,16 @@ app.post('/:user/eventos', async (req, res) => {
     const newDoc = await db.collection(`/users/${user}/eventos`).add({
       titulo: newEvento.titulo,
       descricao:newEvento. descricao,
-      data: newEvento.toISOString(),
+      data: newEvento.data.toISOString(),
       local: newEvento.local,
       imagem: newEvento.imagem || '',
       valor: newEvento.valor,
-      createdAt: new Date().toISOString()
+      createdAt: Timestamp.now()
     });
 
     res.status(201).json({ id: newDoc.id, message: 'Evento criado com sucesso' });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: error.message });
   }
 });
@@ -64,7 +65,10 @@ app.get('/:user/eventos', async (req, res) => {
 
     if (!user) return res.status(400).json({ error: 'User not defined' });
 
-    const snapshot = await db.collection(`/users/${user}/eventos`).get();
+    const query = db.collection(`/users/${user}/eventos`).orderBy('createdAt', 'desc');
+
+    const snapshot = await query.get();
+    
     const items = [];
     
     snapshot.forEach(doc => {
@@ -73,6 +77,7 @@ app.get('/:user/eventos', async (req, res) => {
 
     res.status(200).json(items);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: error.message });
   }
 });
