@@ -31,7 +31,7 @@ const createSchema = yup.object({
   local: yup.string().required('Local inválido').min(3, 'Mínimo 3 characters'),
   data: yup.date().transform(parseCustomDate).typeError('Data inválida').required(),
   valor: yup.number().typeError('Valor inválido').required(),
-  //imagem: yup.string().required('Imagem inválido').min(3, 'Mínimo 3 characters')
+  imagem: yup.string().max(1024, 'Máximo 1024 characters')
 });
 
 app.post('/:user/eventos', async (req, res) => {
@@ -40,10 +40,12 @@ app.post('/:user/eventos', async (req, res) => {
    
     const newEvento = await createSchema.validate(req.body, { abortEarly: false });
     
+    console.log(user, newEvento);
+
     const newDoc = await db.collection(`/users/${user}/eventos`).add({
       titulo: newEvento.titulo,
       descricao:newEvento. descricao,
-      data: new Date().toISOString(),
+      data: newEvento.toISOString(),
       local: newEvento.local,
       imagem: newEvento.imagem || '',
       valor: newEvento.valor,
